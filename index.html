@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suruh Akudus - Jasa Cepat Kudus</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { color: #0056b3; text-align: center; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        select, input, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background-color: #25D366; color: white; border: none; border-radius: 5px; margin-top: 20px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #128C7E; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🛵 SURUH AKUDUS</h2>
+    <p style="text-align: center;">Jasa Angkut & Titip Area Kudus</p>
+    <hr>
+
+    <label>Pilih Layanan:</label>
+    <select id="layanan">
+        <option value="Ojek Penumpang (Rp3.000/km)">Ojek Penumpang</option>
+        <option value="Kirim Barang (Rp3.000/km)">Kirim Barang</option>
+        <option value="Belanja Mart/Makanan (Rp2.500/km)">Belanja Mart/Makanan</option>
+    </select>
+
+    <label>Lokasi Penjemputan:</label>
+    <input type="text" id="jemput" placeholder="Contoh: Depan Menara Kudus">
+
+    <label>Lokasi Tujuan:</label>
+    <input type="text" id="tujuan" placeholder="Contoh: RSUD Loekmono Hadi">
+
+    <label>Catatan Tambahan (Opsional):</label>
+    <textarea id="catatan" placeholder="Contoh: Barang pecah belah / Beli nasi goreng pak kumis"></textarea>
+
+    <button onclick="kirimWA()">PESAN SEKARANG VIA WA</button>
+</div>
+
+<script>
+    function kirimWA() {
+        const nomorWA = "085124569347"; // GANTI DENGAN NOMOR WA ANDA
+        const layanan = document.getElementById('layanan').value;
+        const jemput = document.getElementById('jemput').value;
+        const tujuan = document.getElementById('tujuan').value;
+        const catatan = document.getElementById('catatan').value;
+
+        if (jemput === "" || tujuan === "") {
+            alert("Harap isi lokasi jemput dan tujuan!");
+            return;
+        }
+
+        const pesan = `Halo Suruh Akudus, saya ingin memesan:%0A%0A` +
+                      `*Layanan:* ${layanan}%0A` +
+                      `*Jemput:* ${jemput}%0A` +
+                      `*Tujuan:* ${tujuan}%0A` +
+                      `*Catatan:* ${catatan}%0A%0A` +
+                      `Mohon segera diproses ya!`;
+
+        const url = `https://wa.me/${nomorWA}?text=${pesan}`;
+        window.open(url, '_blank');
+    }
+</script>
+
+</body>
+</html>

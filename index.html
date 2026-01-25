@@ -3,146 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suruh Akudus - Order Otomatis</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <title>Suruh Akudus - Order Layanan</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 10px; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .header { text-align: center; margin-bottom: 20px; }
-        .header img { width: 80px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 15px; margin: 0; }
+        .card { max-width: 400px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #0056b3; margin-top: 0; margin-bottom: 5px; }
+        p.subtitle { text-align: center; font-size: 14px; color: #666; margin-bottom: 20px; }
         
-        .menu-icons { display: flex; justify-content: space-between; margin-bottom: 20px; gap: 5px; }
-        .icon-item { text-align: center; flex: 1; cursor: pointer; padding: 5px; border-radius: 10px; border: 1px solid #eee; }
-        .icon-item img { width: 100%; max-width: 50px; display: block; margin: auto; }
-        .icon-item span { font-size: 10px; font-weight: bold; display: block; margin-top: 5px; }
-        .active { background: #e7f3ff; border-color: #0056b3; }
-
-        label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; }
-        select, input, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; color: #333; }
+        select, input, textarea { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
         
-        .result-box { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 5px solid #0056b3; }
-        .price { font-size: 20px; color: #d9534f; font-weight: bold; }
+        .box-tarif { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-top: 25px; text-align: center; border: 1px dashed #0056b3; }
+        .total-harga { font-size: 26px; font-weight: bold; color: #28a745; display: block; margin: 5px 0; }
+        .info-minimal { font-size: 11px; color: #888; }
         
-        button { width: 100%; padding: 15px; background-color: #25D366; color: white; border: none; border-radius: 8px; margin-top: 20px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { background-color: #128C7E; }
+        button { width: 100%; padding: 16px; background-color: #25D366; color: white; border: none; border-radius: 10px; margin-top: 20px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background-color: #1eb954; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h2>SURUH AKUDUS</h2>
-        <p>Layanan Cepat & Amanah Asli Kudus</p>
-    </div>
+<div class="card">
+    <h2>SURUH AKUDUS</h2>
+    <p class="subtitle">Cepat, Amanah, Cah Kudus Asli!</p>
+    <hr style="border: 0; border-top: 1px solid #eee;">
 
-   <div class="menu-icons">
-        <div class="icon-item active" onclick="setLayanan('Ojek', 3500, this)">
-            <div style="font-size: 30px;">🛵</div>
-            <span>Ojek</span>
-        </div>
-        <div class="icon-item" onclick="setLayanan('Kirim Barang', 3000, this)">
-            <div style="font-size: 30px;">📦</div>
-            <span>Kurir</span>
-        </div>
-        <div class="icon-item" onclick="setLayanan('Makanan/Mart', 4000, this)">
-            <div style="font-size: 30px;">🛍️</div>
-            <span>Jastip</span>
-        </div>
-    </div>
+    <label>Pilih Layanan:</label>
+    <select id="layanan" onchange="hitungTarif()">
+        <option value="Ojek" data-harga="3500">🛵 Ojek (Rp3.500/km)</option>
+        <option value="Kurir" data-harga="3000">📦 Kurir Barang (Rp3.000/km)</option>
+        <option value="Jastip" data-harga="2500">🛒 Jastip Belanja (Rp2.500/km)</option>
+    </select>
 
-    <label>Lokasi Jemput (Nama Tempat/Jalan):</label>
-    <input type="text" id="jemput" placeholder="Contoh: Menara Kudus" onchange="hitungJarak()">
+    <label>Titik Penjemputan:</label>
+    <input type="text" id="jemput" placeholder="Contoh: Menara Kudus">
 
-    <label>Lokasi Tujuan:</label>
-    <input type="text" id="tujuan" placeholder="Contoh: Simpang Tujuh Kudus" onchange="hitungJarak()">
+    <label>Titik Tujuan:</label>
+    <input type="text" id="tujuan" placeholder="Contoh: RSUD Loekmono Hadi">
 
-    <label>Catatan:</label>
-    <textarea id="catatan" placeholder="Contoh: Beli Nasi Goreng Pak Kumis pedas satu"></textarea>
+    <label>Estimasi Jarak (Masukkan Angka KM):</label>
+    <input type="number" id="jarak" placeholder="Contoh: 5" oninput="hitungTarif()">
 
-    <div class="result-box">
-        <div>Estimasi Jarak: <span id="jarak-teks">0 km</span></div>
-        <div>Total Tarif: <span class="price" id="tarif-teks">Rp0</span></div>
-        <small>*Tarif minimum Rp8.000 berlaku</small>
+    <label>Catatan Tambahan (Opsional):</label>
+    <textarea id="catatan" rows="2" placeholder="Misal: Beli Nasi Goreng Pak Kumis..."></textarea>
+
+    <div class="box-tarif">
+        <span style="font-size: 13px; color: #555;">Estimasi Total Tarif:</span>
+        <span class="total-harga" id="tampilan-tarif">Rp8.000</span>
+        <span class="info-minimal">*Tarif minimal Rp8.000 berlaku</span>
     </div>
 
     <button onclick="kirimWA()">PESAN SEKARANG VIA WA</button>
 </div>
 
 <script>
-    let hargaPerKm = 3500;
-    let namaLayanan = "Ojek";
-    let jarakFinal = 0;
-    let tarifFinal = 0;
+    function hitungTarif() {
+        const selectLayanan = document.getElementById('layanan');
+        const hargaPerKm = parseInt(selectLayanan.options[selectLayanan.selectedIndex].getAttribute('data-harga'));
+        const jarak = parseFloat(document.getElementById('jarak').value);
+        const tampilan = document.getElementById('tampilan-tarif');
 
-    function setLayanan(nama, harga, el) {
-        namaLayanan = nama;
-        hargaPerKm = harga;
-        document.querySelectorAll('.icon-item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
-        hitungJarak();
-    }
-
-    async function getCoords(address) {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${address}, Kudus`);
-        const data = await response.json();
-        if (data.length > 0) {
-            return [data[0].lat, data[0].lon];
-        }
-        return null;
-    }
-
-    async function hitungJarak() {
-        const loc1 = document.getElementById('jemput').value;
-        const loc2 = document.getElementById('tujuan').value;
-
-        if (loc1 && loc2) {
-            const coord1 = await getCoords(loc1);
-            const coord2 = await getCoords(loc2);
-
-            if (coord1 && coord2) {
-                // Rumus Haversine untuk jarak garis lurus
-                const R = 6371;
-                const dLat = (coord2[0] - coord1[0]) * Math.PI / 180;
-                const dLon = (coord2[1] - coord1[1]) * Math.PI / 180;
-                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                          Math.cos(coord1[0] * Math.PI / 180) * Math.cos(coord2[0] * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                const d = R * c;
-
-                // Tambahkan 20% karena jalanan tidak lurus (estimasi rute)
-                jarakFinal = (d * 1.2).toFixed(1);
-                
-                // Hitung Tarif
-                tarifFinal = jarakFinal * hargaPerKm;
-                if (tarifFinal < 8000) tarifFinal = 8000; // Tarif Minimum
-
-                document.getElementById('jarak-teks').innerText = jarakFinal + " km";
-                document.getElementById('tarif-teks').innerText = "Rp" + Math.round(tarifFinal).toLocaleString('id-ID');
+        if (jarak && jarak > 0) {
+            let total = jarak * hargaPerKm;
+            // Logika Tarif Minimal Rp 8.000
+            if (total < 8000) {
+                total = 8000;
             }
+            tampilan.innerText = "Rp" + Math.round(total).toLocaleString('id-ID');
+        } else {
+            tampilan.innerText = "Rp8.000";
         }
     }
 
     function kirimWA() {
-        const nomorWA = "6285124569347"; // GANTI NOMOR ANDA
+        // Nomor WA Anda: +62 851-2456-9347
+        const nomorWA = "6285124569347"; 
+        const layanan = document.getElementById('layanan').value;
         const jemput = document.getElementById('jemput').value;
         const tujuan = document.getElementById('tujuan').value;
+        const jarak = document.getElementById('jarak').value;
         const catatan = document.getElementById('catatan').value;
+        const tarif = document.getElementById('tampilan-tarif').innerText;
 
-        if (!jemput || !tujuan) { alert("Isi lokasi dulu lur!"); return; }
+        if (!jemput || !tujuan || !jarak) {
+            alert("Harap isi alamat penjemputan, tujuan, dan jarak KM!");
+            return;
+        }
 
-        const pesan = `*ORDER SURUH AKUDUS*%0A` +
-                      `--------------------------%0A` +
-                      `*Layanan:* ${namaLayanan}%0A` +
-                      `*Jemput:* ${jemput}%0A` +
-                      `*Tujuan:* ${tujuan}%0A` +
-                      `*Jarak:* ~${jarakFinal} km%0A` +
-                      `*Tarif:* Rp${Math.round(tarifFinal).toLocaleString('id-ID')}%0A` +
-                      `*Catatan:* ${catatan}%0A` +
-                      `--------------------------%0A` +
-                      `_Cepat & Amanah Asli Kudus_`;
+        const teks = `*ORDER SURUH AKUDUS*%0A` +
+                     `--------------------------%0A` +
+                     `*Layanan:* ${layanan}%0A` +
+                     `*Jemput:* ${jemput}%0A` +
+                     `*Tujuan:* ${tujuan}%0A` +
+                     `*Jarak:* ${jarak} km%0A` +
+                     `*Tarif:* ${tarif}%0A` +
+                     `*Catatan:* ${catatan || '-'}%0A` +
+                     `--------------------------%0A` +
+                     `_Mohon segera diproses, terima kasih._`;
 
-        window.open(`https://wa.me/${nomorWA}?text=${pesan}`, '_blank');
+        window.open(`https://wa.me/${nomorWA}?text=${teks}`, '_blank');
     }
 </script>
 

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Suruh Akudus - Order Layanan</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 15px; margin: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; padding: 15px; margin: 0; }
         .card { max-width: 400px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { text-align: center; color: #0056b3; margin-top: 0; margin-bottom: 5px; }
         p.subtitle { text-align: center; font-size: 14px; color: #666; margin-bottom: 20px; }
@@ -15,10 +15,12 @@
         
         .box-tarif { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-top: 25px; text-align: center; border: 1px dashed #0056b3; }
         .total-harga { font-size: 26px; font-weight: bold; color: #28a745; display: block; margin: 5px 0; }
-        .info-minimal { font-size: 11px; color: #888; }
         
-        button { width: 100%; padding: 16px; background-color: #25D366; color: white; border: none; border-radius: 10px; margin-top: 20px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { background-color: #1eb954; }
+        #btn-pesan { width: 100%; padding: 16px; background-color: #25D366; color: white; border: none; border-radius: 10px; margin-top: 20px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        #btn-pesan.game { background-color: #6f42c1; } /* Warna ungu untuk Game */
+        #btn-pesan:hover { opacity: 0.9; }
+        
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -29,79 +31,112 @@
     <hr style="border: 0; border-top: 1px solid #eee;">
 
     <label>Pilih Layanan:</label>
-    <select id="layanan" onchange="hitungTarif()">
+    <select id="layanan" onchange="cekLayanan()">
         <option value="Ojek" data-harga="3500">🛵 Ojek (Rp3.500/km)</option>
         <option value="Kurir" data-harga="3000">📦 Kurir Barang (Rp3.000/km)</option>
         <option value="Jastip" data-harga="2500">🛒 Jastip Belanja (Rp2.500/km)</option>
+        <option value="Game">🎮 Top Up Game & Voucher</option>
     </select>
 
-    <label>Titik Penjemputan:</label>
-    <input type="text" id="jemput" placeholder="Contoh: Menara Kudus">
+    <div id="form-jasa">
+        <label>Titik Penjemputan:</label>
+        <input type="text" id="jemput" placeholder="Contoh: Menara Kudus">
 
-    <label>Titik Tujuan:</label>
-    <input type="text" id="tujuan" placeholder="Contoh: RSUD Loekmono Hadi">
+        <label>Titik Tujuan:</label>
+        <input type="text" id="tujuan" placeholder="Contoh: RSUD Loekmono Hadi">
 
-    <label>Estimasi Jarak (Masukkan Angka KM):</label>
-    <input type="number" id="jarak" placeholder="Contoh: 5" oninput="hitungTarif()">
+        <label>Estimasi Jarak (KM):</label>
+        <input type="number" id="jarak" placeholder="Contoh: 5" oninput="hitungTarif()">
 
-    <label>Catatan Tambahan (Opsional):</label>
-    <textarea id="catatan" rows="2" placeholder="Misal: Beli Nasi Goreng Pak Kumis..."></textarea>
+        <label>Catatan Tambahan:</label>
+        <textarea id="catatan" rows="2" placeholder="Detail tambahan..."></textarea>
 
-    <div class="box-tarif">
-        <span style="font-size: 13px; color: #555;">Estimasi Total Tarif:</span>
-        <span class="total-harga" id="tampilan-tarif">Rp8.000</span>
-        <span class="info-minimal">*Tarif minimal Rp8.000 berlaku</span>
+        <div class="box-tarif">
+            <span style="font-size: 13px; color: #555;">Estimasi Total Tarif:</span>
+            <span class="total-harga" id="tampilan-tarif">Rp8.000</span>
+            <span style="font-size: 11px; color: #888;">*Tarif minimal Rp8.000</span>
+        </div>
     </div>
 
-    <button onclick="kirimWA()">PESAN SEKARANG VIA WA</button>
+    <div id="info-game" class="hidden">
+        <div class="box-tarif" style="background: #f3e5f5; border-color: #6f42c1;">
+            <p style="margin: 0; color: #6f42c1; font-weight: bold;">Top Up Game Otomatis</p>
+            <small>Klik tombol di bawah untuk masuk ke store.</small>
+        </div>
+    </div>
+
+    <button id="btn-pesan" onclick="prosesPesan()">PESAN SEKARANG VIA WA</button>
 </div>
 
 <script>
+    function cekLayanan() {
+        const layanan = document.getElementById('layanan').value;
+        const formJasa = document.getElementById('form-jasa');
+        const infoGame = document.getElementById('info-game');
+        const btn = document.getElementById('btn-pesan');
+
+        if (layanan === "Game") {
+            formJasa.classList.add('hidden');
+            infoGame.classList.remove('hidden');
+            btn.innerText = "TOP UP SEKARANG";
+            btn.className = "game";
+        } else {
+            formJasa.classList.remove('hidden');
+            infoGame.classList.add('hidden');
+            btn.innerText = "PESAN SEKARANG VIA WA";
+            btn.className = "";
+            hitungTarif();
+        }
+    }
+
     function hitungTarif() {
         const selectLayanan = document.getElementById('layanan');
-        const hargaPerKm = parseInt(selectLayanan.options[selectLayanan.selectedIndex].getAttribute('data-harga'));
+        const option = selectLayanan.options[selectLayanan.selectedIndex];
+        const hargaPerKm = parseInt(option.getAttribute('data-harga'));
         const jarak = parseFloat(document.getElementById('jarak').value);
         const tampilan = document.getElementById('tampilan-tarif');
 
         if (jarak && jarak > 0) {
             let total = jarak * hargaPerKm;
-            // Logika Tarif Minimal Rp 8.000
-            if (total < 8000) {
-                total = 8000;
-            }
+            if (total < 8000) total = 8000;
             tampilan.innerText = "Rp" + Math.round(total).toLocaleString('id-ID');
         } else {
             tampilan.innerText = "Rp8.000";
         }
     }
 
-    function kirimWA() {
-        // Nomor WA Anda: +62 851-2456-9347
-        const nomorWA = "6285124569347"; 
+    function prosesPesan() {
         const layanan = document.getElementById('layanan').value;
-        const jemput = document.getElementById('jemput').value;
-        const tujuan = document.getElementById('tujuan').value;
-        const jarak = document.getElementById('jarak').value;
-        const catatan = document.getElementById('catatan').value;
-        const tarif = document.getElementById('tampilan-tarif').innerText;
+        
+        if (layanan === "Game") {
+            // Langsung buka link SpeedCash
+            window.open("https://link.speedcash.co.id/shopwarehouse", "_blank");
+        } else {
+            // Proses Pesanan WA
+            const nomorWA = "6285124569347"; 
+            const jemput = document.getElementById('jemput').value;
+            const tujuan = document.getElementById('tujuan').value;
+            const jarak = document.getElementById('jarak').value;
+            const catatan = document.getElementById('catatan').value;
+            const tarif = document.getElementById('tampilan-tarif').innerText;
 
-        if (!jemput || !tujuan || !jarak) {
-            alert("Harap isi alamat penjemputan, tujuan, dan jarak KM!");
-            return;
+            if (!jemput || !tujuan || !jarak) {
+                alert("Mohon isi alamat dan jarak dulu lur!");
+                return;
+            }
+
+            const teks = `*ORDER SURUH AKUDUS*%0A` +
+                         `--------------------------%0A` +
+                         `*Layanan:* ${layanan}%0A` +
+                         `*Jemput:* ${jemput}%0A` +
+                         `*Tujuan:* ${tujuan}%0A` +
+                         `*Jarak:* ${jarak} km%0A` +
+                         `*Tarif:* ${tarif}%0A` +
+                         `*Catatan:* ${catatan || '-'}%0A` +
+                         `--------------------------`;
+
+            window.open(`https://wa.me/${nomorWA}?text=${teks}`, '_blank');
         }
-
-        const teks = `*ORDER SURUH AKUDUS*%0A` +
-                     `--------------------------%0A` +
-                     `*Layanan:* ${layanan}%0A` +
-                     `*Jemput:* ${jemput}%0A` +
-                     `*Tujuan:* ${tujuan}%0A` +
-                     `*Jarak:* ${jarak} km%0A` +
-                     `*Tarif:* ${tarif}%0A` +
-                     `*Catatan:* ${catatan || '-'}%0A` +
-                     `--------------------------%0A` +
-                     `_Mohon segera diproses, terima kasih._`;
-
-        window.open(`https://wa.me/${nomorWA}?text=${teks}`, '_blank');
     }
 </script>
 

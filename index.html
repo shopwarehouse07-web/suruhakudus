@@ -3,141 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suruh Akudus - Order Layanan</title>
+    <title>Suruh Akudus - Sistem Super App</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; padding: 15px; margin: 0; }
-        .card { max-width: 400px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #0056b3; margin-top: 0; margin-bottom: 5px; }
-        p.subtitle { text-align: center; font-size: 14px; color: #666; margin-bottom: 20px; }
+        :root { --primary: #0056b3; --driver: #6f42c1; --admin: #dc3545; --success: #28a745; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding-bottom: 60px; }
+        .container { max-width: 500px; margin: auto; background: white; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         
-        label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; color: #333; }
-        select, input, textarea { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
+        /* Navigasi Bawah */
+        .navbar { position: fixed; bottom: 0; width: 100%; max-width: 500px; background: white; display: flex; border-top: 1px solid #ddd; }
+        .nav-item { flex: 1; text-align: center; padding: 15px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .nav-item.active { color: var(--primary); border-top: 3px solid var(--primary); }
+
+        /* Content */
+        .page { padding: 20px; display: none; }
+        .page.active { display: block; }
+        h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; }
         
-        .box-tarif { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-top: 25px; text-align: center; border: 1px dashed #0056b3; }
-        .total-harga { font-size: 26px; font-weight: bold; color: #28a745; display: block; margin: 5px 0; }
+        /* Card Styles */
+        .card { background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 5px solid var(--primary); }
+        label { display: block; margin: 10px 0 5px; font-weight: bold; }
+        input, select, button { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        button { border: none; color: white; cursor: pointer; font-weight: bold; }
         
-        #btn-pesan { width: 100%; padding: 16px; background-color: #25D366; color: white; border: none; border-radius: 10px; margin-top: 20px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        #btn-pesan.game { background-color: #6f42c1; } /* Warna ungu untuk Game */
-        #btn-pesan:hover { opacity: 0.9; }
+        /* Colors */
+        .btn-user { background: var(--primary); }
+        .btn-driver { background: var(--driver); }
+        .btn-admin { background: var(--admin); }
         
-        .hidden { display: none; }
+        .badge { display: inline-block; padding: 5px 10px; border-radius: 5px; font-size: 11px; color: white; }
+        .bg-wait { background: orange; }
+        .bg-done { background: var(--success); }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>SURUH AKUDUS</h2>
-    <p class="subtitle">Cepat, Amanah, Cah Kudus Asli!</p>
-    <hr style="border: 0; border-top: 1px solid #eee;">
+<div class="container">
+    <div id="page-user" class="page active">
+        <h2 style="color: var(--primary);">🛒 Order Layanan</h2>
+        <label>Pilih Jasa:</label>
+        <select id="user-layanan">
+            <option value="Ojek" data-harga="3500">🛵 Ojek (Rp3.500/km)</option>
+            <option value="Kurir" data-harga="3000">📦 Kurir (Rp3.000/km)</option>
+        </select>
+        <input type="text" id="user-jemput" placeholder="Titik Jemput">
+        <input type="text" id="user-tujuan" placeholder="Titik Tujuan">
+        <input type="number" id="user-jarak" placeholder="Jarak (KM)" oninput="updateEstimasi()">
+        <div class="card">
+            Estimasi Tarif: <strong id="estimasi-tarif">Rp0</strong>
+        </div>
+        <button class="btn-user" onclick="kirimOrder()">PESAN SEKARANG</button>
+    </div>
 
-    <label>Pilih Layanan:</label>
-    <select id="layanan" onchange="cekLayanan()">
-        <option value="Ojek" data-harga="3500">🛵 Ojek</option>
-        <option value="Kurir" data-harga="3000">📦 Kurir Barang</option>
-        <option value="Jastip" data-harga="2500">🛒 Jastip Belanja</option>
-        <option value="Game">🎮 Top Up Game & Voucher</option>
-    </select>
+    <div id="page-driver" class="page">
+        <h2 style="color: var(--driver);">🛵 Driver Panel</h2>
+        <div class="card" style="border-left-color: var(--driver); text-align: center;">
+            Saldo Driver: <br>
+            <span style="font-size: 24px; font-weight: bold; color: var(--success);" id="driver-saldo-val">Rp0</span>
+        </div>
+        <hr>
+        <h4>Orderan Tersedia:</h4>
+        <div id="list-order-driver">
+            </div>
+    </div>
 
-    <div id="form-jasa">
-        <label>Titik Penjemputan:</label>
-        <input type="text" id="jemput" placeholder="Contoh: Menara Kudus">
-
-        <label>Titik Tujuan:</label>
-        <input type="text" id="tujuan" placeholder="Contoh: RSUD Loekmono Hadi">
-
-        <label>Estimasi Jarak (KM):</label>
-        <input type="number" id="jarak" placeholder="Contoh: 5" oninput="hitungTarif()">
-
-        <label>Catatan Tambahan:</label>
-        <textarea id="catatan" rows="2" placeholder="Detail tambahan..."></textarea>
-
-        <div class="box-tarif">
-            <span style="font-size: 13px; color: #555;">Estimasi Total Tarif:</span>
-            <span class="total-harga" id="tampilan-tarif">Rp8.000</span>
-            <span style="font-size: 11px; color: #888;">*Tarif minimal Rp8.000</span>
+    <div id="page-boss" class="page">
+        <h2 style="color: var(--admin);">👑 Boss Dashboard</h2>
+        <div class="card" style="border-left-color: var(--admin);">
+            Total Keuntungan (Komisi): <br>
+            <span style="font-size: 24px; font-weight: bold;" id="boss-cuan">Rp0</span>
+        </div>
+        
+        <h4>Manajemen Driver:</h4>
+        <div class="card">
+            <label>Isi Saldo Driver (Top Up):</label>
+            <input type="number" id="topup-amount" placeholder="Jumlah Rp">
+            <button class="btn-admin" onclick="topUpDriver()">TAMBAH SALDO</button>
         </div>
     </div>
 
-    <div id="info-game" class="hidden">
-        <div class="box-tarif" style="background: #f3e5f5; border-color: #6f42c1;">
-            <p style="margin: 0; color: #6f42c1; font-weight: bold;">Top Up Game Otomatis</p>
-            <small>Klik tombol di bawah untuk masuk ke store.</small>
-        </div>
+    <div class="navbar">
+        <div class="nav-item active" onclick="showPage('user', this)">PENUMPANG</div>
+        <div class="nav-item" onclick="showPage('driver', this)">DRIVER</div>
+        <div class="nav-item" onclick="showPage('boss', this)">BOSS</div>
     </div>
-
-    <button id="btn-pesan" onclick="prosesPesan()">PESAN SEKARANG VIA WA</button>
 </div>
 
 <script>
-    function cekLayanan() {
-        const layanan = document.getElementById('layanan').value;
-        const formJasa = document.getElementById('form-jasa');
-        const infoGame = document.getElementById('info-game');
-        const btn = document.getElementById('btn-pesan');
+    // DATA STORAGE (Simulasi Database)
+    let db = {
+        orders: JSON.parse(localStorage.getItem('akudus_orders')) || [],
+        driverSaldo: parseInt(localStorage.getItem('akudus_saldo')) || 0,
+        bossProfit: parseInt(localStorage.getItem('akudus_profit')) || 0
+    };
 
-        if (layanan === "Game") {
-            formJasa.classList.add('hidden');
-            infoGame.classList.remove('hidden');
-            btn.innerText = "TOP UP SEKARANG";
-            btn.className = "game";
-        } else {
-            formJasa.classList.remove('hidden');
-            infoGame.classList.add('hidden');
-            btn.innerText = "PESAN SEKARANG VIA WA";
-            btn.className = "";
-            hitungTarif();
+    function saveDB() {
+        localStorage.setItem('akudus_orders', JSON.stringify(db.orders));
+        localStorage.setItem('akudus_saldo', db.driverSaldo);
+        localStorage.setItem('akudus_profit', db.bossProfit);
+        renderAll();
+    }
+
+    // SISTEM NAVIGASI
+    function showPage(pageId, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('page-' + pageId).classList.add('active');
+        el.classList.add('active');
+        renderAll();
+    }
+
+    // LOGIKA PENUMPANG
+    function updateEstimasi() {
+        let jarak = document.getElementById('user-jarak').value;
+        let harga = document.querySelector('#user-layanan option:checked').dataset.harga;
+        let total = (jarak * harga) || 0;
+        if (total > 0 && total < 8000) total = 8000;
+        document.getElementById('estimasi-tarif').innerText = "Rp" + total.toLocaleString();
+    }
+
+    function kirimOrder() {
+        let order = {
+            id: Date.now(),
+            layanan: document.getElementById('user-layanan').value,
+            jemput: document.getElementById('user-jemput').value,
+            tujuan: document.getElementById('user-tujuan').value,
+            tarif: parseInt(document.getElementById('estimasi-tarif').innerText.replace(/\D/g,'')),
+            status: 'MENUNGGU'
+        };
+        if(!order.jemput || !order.tarif) return alert("Isi data dulu lur!");
+        db.orders.push(order);
+        saveDB();
+        alert("Orderan dikirim ke server! Cek halaman Driver.");
+    }
+
+    // LOGIKA DRIVER
+    function renderAll() {
+        // Update Tampilan Saldo & Profit
+        document.getElementById('driver-saldo-val').innerText = "Rp" + db.driverSaldo.toLocaleString();
+        document.getElementById('boss-cuan').innerText = "Rp" + db.bossProfit.toLocaleString();
+
+        // Render List Orderan buat Driver
+        let listHtml = "";
+        db.orders.filter(o => o.status === 'MENUNGGU').forEach(o => {
+            listHtml += `
+                <div class="card" style="border-left-color: var(--driver);">
+                    <strong>${o.layanan}</strong><br>
+                    📍 ${o.jemput} -> 🏁 ${o.tujuan}<br>
+                    💰 Tarif: Rp${o.tarif.toLocaleString()}<br><br>
+                    <button class="btn-driver" onclick="ambilOrder(${o.id}, ${o.tarif})">AMBIL ORDER</button>
+                </div>
+            `;
+        });
+        document.getElementById('list-order-driver').innerHTML = listHtml || "<p>Belum ada orderan masuk...</p>";
+    }
+
+    function ambilOrder(id, tarif) {
+        let potongan = tarif * 0.10; // POTONGAN 10%
+        if (db.driverSaldo < potongan) return alert("Saldo kurang! Top up dulu ke Bos.");
+
+        if (confirm(`Ambil order? Saldo akan dipotong Rp${potongan.toLocaleString()} (10%)`)) {
+            db.driverSaldo -= potongan;
+            db.bossProfit += potongan;
+            // Update status order (hapus dari list menunggu)
+            db.orders = db.orders.filter(o => o.id !== id);
+            saveDB();
+            alert("Berhasil! Silakan jemput pelanggan. Kamu dapat Rp" + tarif.toLocaleString() + " tunai.");
         }
     }
 
-    function hitungTarif() {
-        const selectLayanan = document.getElementById('layanan');
-        const option = selectLayanan.options[selectLayanan.selectedIndex];
-        const hargaPerKm = parseInt(option.getAttribute('data-harga'));
-        const jarak = parseFloat(document.getElementById('jarak').value);
-        const tampilan = document.getElementById('tampilan-tarif');
-
-        if (jarak && jarak > 0) {
-            let total = jarak * hargaPerKm;
-            if (total < 8000) total = 8000;
-            tampilan.innerText = "Rp" + Math.round(total).toLocaleString('id-ID');
-        } else {
-            tampilan.innerText = "Rp8.000";
-        }
+    // LOGIKA BOS
+    function topUpDriver() {
+        let nominal = parseInt(document.getElementById('topup-amount').value);
+        if(!nominal) return alert("Isi nominal!");
+        db.driverSaldo += nominal;
+        saveDB();
+        document.getElementById('topup-amount').value = "";
+        alert("Saldo Driver berhasil ditambah!");
     }
 
-    function prosesPesan() {
-        const layanan = document.getElementById('layanan').value;
-        
-        if (layanan === "Game") {
-            // Langsung buka link SpeedCash
-            window.open("https://link.speedcash.co.id/shopwarehouse", "_blank");
-        } else {
-            // Proses Pesanan WA
-            const nomorWA = "6285124569347"; 
-            const jemput = document.getElementById('jemput').value;
-            const tujuan = document.getElementById('tujuan').value;
-            const jarak = document.getElementById('jarak').value;
-            const catatan = document.getElementById('catatan').value;
-            const tarif = document.getElementById('tampilan-tarif').innerText;
-
-            if (!jemput || !tujuan || !jarak) {
-                alert("Mohon isi alamat dan jarak dulu lur!");
-                return;
-            }
-
-            const teks = `*ORDER SURUH AKUDUS*%0A` +
-                         `--------------------------%0A` +
-                         `*Layanan:* ${layanan}%0A` +
-                         `*Jemput:* ${jemput}%0A` +
-                         `*Tujuan:* ${tujuan}%0A` +
-                         `*Jarak:* ${jarak} km%0A` +
-                         `*Tarif:* ${tarif}%0A` +
-                         `*Catatan:* ${catatan || '-'}%0A` +
-                         `--------------------------`;
-
-            window.open(`https://wa.me/${nomorWA}?text=${teks}`, '_blank');
-        }
-    }
+    // Jalankan render pertama kali
+    renderAll();
 </script>
 
 </body>

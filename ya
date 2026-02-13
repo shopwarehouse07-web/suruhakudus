@@ -1,0 +1,11 @@
+<label>Pilih Layanan:</label>
+<select id="layanan" onchange="cekLayanan()">
+        <option value="Ojek" data-harga="3500">🛵 Ojek (Rp3.500/km)</option>
+        <option value="Kurir" data-harga="3000">📦 Kurir Barang (Rp3.000/km)</option>
+        <option value="Jastip" data-harga="2500">🛒 Jastip Belanja (Rp2.500/km)</option>
+        <option value="Ojek" data-harga="3500">🛵 Ojek</option>
+        <option value="Kurir" data-harga="3000">📦 Kurir Barang</option>
+        <option value="Jastip" data-harga="2500">🛒 Jastip Belanja</option>
+<option value="Game">🎮 Top Up Game & Voucher</option>
+</select>
+

@@ -3,133 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suruh Akudus - Solusi Transportasi & PPOB 🛵</title>
+    <title>Suruh Akudus - Gen Z Edition 🛵</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
-            --primary: #007bff;
-            --primary-dark: #0056b3;
-            --success: #28a745;
-            --card-bg: #ffffff;
-            --text-color: #333333;
-            --body-bg: #f4f7f9;
-            --input-bg: #ffffff;
-            --input-border: #cccccc;
+            --accent: #6366f1; /* Indigo Soft */
+            --bg-light: #f8fafc;
+            --card-light: rgba(255, 255, 255, 0.9);
+            --text-main: #1e293b;
+            --glass: rgba(255, 255, 255, 0.7);
         }
 
         .dark-theme {
-            --card-bg: #1e2125;
-            --text-color: #e9ecef;
-            --body-bg: #121416;
-            --input-bg: #2b3035;
-            --input-border: #495057;
+            --bg-light: #0f172a;
+            --card-light: rgba(30, 41, 59, 0.9);
+            --text-main: #f1f5f9;
+            --glass: rgba(15, 23, 42, 0.7);
         }
 
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: var(--body-bg); color: var(--text-color); padding: 15px; margin: 0; transition: 0.5s; }
-        .card { max-width: 450px; margin: auto; background: var(--card-bg); padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        body { 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+            background-color: var(--bg-light); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 20px;
+            transition: all 0.4s ease;
+        }
+
+        .card { 
+            max-width: 450px; 
+            margin: auto; 
+            background: var(--card-bg); 
+            backdrop-filter: blur(10px);
+            padding: 30px; 
+            border-radius: 24px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        h2 { 
+            font-weight: 800; 
+            letter-spacing: -1px; 
+            margin: 0; 
+            background: linear-gradient(to right, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle { font-size: 14px; opacity: 0.6; margin-top: 8px; font-weight: 400; }
+
+        .tabs { 
+            display: flex; 
+            background: rgba(0,0,0,0.04); 
+            padding: 6px; 
+            border-radius: 16px; 
+            margin: 25px 0;
+        }
+
+        .tab-btn { 
+            flex: 1; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 13px;
+            background: transparent; 
+            color: var(--text-main); 
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tab-btn.active { 
+            background: white; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            color: var(--accent);
+        }
+
+        label { display: block; margin-top: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); }
         
-        .header-section { text-align: center; margin-bottom: 20px; }
-        h2 { color: var(--primary); margin: 0; letter-spacing: 1px; }
-        .subtitle { font-size: 14px; opacity: 0.8; margin-top: 5px; font-weight: 500; }
+        select, input { 
+            width: 100%; 
+            padding: 14px; 
+            margin-top: 8px; 
+            border: 1px solid rgba(0,0,0,0.08); 
+            border-radius: 14px; 
+            background: var(--input-bg); 
+            color: var(--text-main);
+            font-size: 15px;
+            outline: none;
+            transition: 0.2s;
+        }
 
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; background: rgba(0,0,0,0.05); padding: 5px; border-radius: 12px; }
-        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; background: none; color: var(--text-color); transition: 0.3s; }
-        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(0,123,255,0.3); }
-
-        label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; color: var(--primary); }
-        select, input, textarea { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid var(--input-border); border-radius: 10px; box-sizing: border-box; font-size: 15px; background: var(--input-bg); color: var(--text-color); outline: none; }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 5px rgba(0,123,255,0.2); }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
         
-        .btn-lokasi { background: none; border: none; color: var(--primary); font-size: 12px; cursor: pointer; padding: 8px 0; font-weight: bold; display: flex; align-items: center; gap: 4px; }
-        .search-results { background: var(--input-bg); border: 1px solid var(--input-border); position: absolute; z-index: 1000; width: 100%; max-height: 200px; overflow-y: auto; display: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .search-item { padding: 12px; cursor: pointer; border-bottom: 1px solid var(--input-border); font-size: 13px; line-height: 1.4; }
-        .search-item:hover { background: rgba(0,123,255,0.05); }
+        .btn-lokasi { 
+            background: transparent; 
+            color: var(--accent); 
+            border: none; 
+            font-size: 12px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-        /* Styling Peta */
-        #map { height: 200px; width: 100%; border-radius: 15px; margin-top: 15px; border: 2px solid var(--primary); display: none; }
+        #map { 
+            height: 220px; 
+            width: 100%; 
+            border-radius: 20px; 
+            margin-top: 20px; 
+            border: none; 
+            display: none; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
 
-        .box-tarif { background: rgba(0, 123, 255, 0.08); padding: 18px; border-radius: 15px; margin-top: 25px; text-align: center; border: 1px solid var(--primary); }
-        .total-label { font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--text-color); opacity: 0.7; }
-        .total-harga { font-size: 34px; font-weight: 800; color: var(--primary); display: block; margin: 5px 0; }
-        .estimasi-waktu { font-size: 14px; color: var(--text-color); font-weight: bold; display: block; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px dashed var(--primary); }
-        .info-minimal { font-size: 11px; font-weight: bold; color: var(--success); display: block; margin-top: 5px; }
+        .box-tarif { 
+            background: linear-gradient(135deg, #6366f1, #8b5cf6); 
+            padding: 24px; 
+            border-radius: 20px; 
+            margin-top: 30px; 
+            text-align: center; 
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
 
-        .review-section { margin-top: 35px; padding-top: 20px; border-top: 1px solid var(--input-border); }
-        #btn-pesan { width: 100%; padding: 18px; background-color: var(--success); color: white; border: none; border-radius: 12px; margin-top: 20px; font-size: 16px; cursor: pointer; font-weight: bold; box-shadow: 0 5px 15px rgba(40,167,69,0.3); transition: 0.3s; }
+        .box-tarif::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        }
+
+        .total-harga { font-size: 32px; font-weight: 800; display: block; margin: 4px 0; }
+        .estimasi-waktu { font-size: 13px; opacity: 0.9; font-weight: 500; }
+
+        #btn-pesan { 
+            width: 100%; 
+            padding: 18px; 
+            background: var(--text-main); 
+            color: white; 
+            border: none; 
+            border-radius: 16px; 
+            margin-top: 15px; 
+            font-size: 16px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: 0.3s;
+        }
+
+        #btn-pesan:hover { transform: scale(1.02); filter: brightness(1.2); }
+
+        .ppob-card {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(0,0,0,0.05);
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .ppob-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.05); }
+
+        .search-results {
+            background: white; border: 1px solid #eee; border-radius: 12px;
+            position: absolute; width: 100%; z-index: 99; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-height: 200px; overflow-y: auto; display: none;
+        }
+
+        .search-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f8fafc; font-size: 13px; color: #475569; }
+        .search-item:hover { background: #f1f5f9; color: var(--accent); }
+
+        #loading-overlay { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(255,255,255,0.8); backdrop-filter: blur(5px); z-index: 10000; 
+            flex-direction: column; align-items: center; justify-content: center; 
+        }
+
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .hidden { display: none; }
-        #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
     </style>
 </head>
 <body>
 
 <div id="loading-overlay">
-    <div style="width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.1); border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px;"></div>
-    <b id="loading-text">Menghubungkan...</b>
+    <div class="spinner"></div>
+    <p style="margin-top:15px; font-weight:600; color:var(--text-main)" id="loading-text">Hang tight...</p>
 </div>
 
 <div class="card">
     <div class="header-section">
-        <h2>SURUH AKUDUS 🚀</h2>
-        <p class="subtitle" id="time-greeting">Mitra Setia Transportasi Anda</p>
+        <h2>SURUH AKUDUS</h2>
+        <p class="subtitle" id="time-greeting">Your personal assistant, right here.</p>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('jasa')">🛵 Layanan Jasa</button>
-        <button class="tab-btn" onclick="switchTab('ppob')">💎 Produk Digital</button>
+        <button class="tab-btn active" onclick="switchTab('jasa')">Services</button>
+        <button class="tab-btn" onclick="switchTab('ppob')">Digital</button>
     </div>
 
     <div id="tab-jasa">
-        <label>Pilih Layanan 📋</label>
+        <label>What do you need?</label>
         <select id="layanan" onchange="hitungTarif()">
-            <option value="Ojek" data-harga="2500">Ojek Online (Rp2.500/km) 🛵</option>
-            <option value="Kurir" data-harga="2000">Kurir Barang (Rp2.000/km) 📦</option>
-            <option value="Jastip" data-harga="2000">Jasa Titip Belanja (Rp2.000/km) 🛒</option>
+            <option value="Ojek" data-harga="2500">Ojek Online (Best Seller) 🛵</option>
+            <option value="Kurir" data-harga="2000">Kurir Barang 📦</option>
+            <option value="Jastip" data-harga="2000">Jasa Titip Belanja 🛒</option>
         </select>
 
         <div style="position: relative;">
-            <label>Titik Penjemputan 📍</label>
-            <input type="text" id="jemput" placeholder="Cari lokasi jemput..." oninput="cariAlamat('jemput')">
-            <button type="button" class="btn-lokasi" onclick="ambilLokasiSaya()">✨ Gunakan Lokasi Saya</button>
+            <label>Pickup Point</label>
+            <input type="text" id="jemput" placeholder="Where should we meet?" oninput="cariAlamat('jemput')">
+            <button type="button" class="btn-lokasi" onclick="ambilLokasiSaya()">✨ Use My Current Location</button>
             <div id="res-jemput" class="search-results"></div>
         </div>
 
         <div style="position: relative;">
-            <label>Titik Tujuan 🏁</label>
-            <input type="text" id="tujuan" placeholder="Cari tujuan..." oninput="cariAlamat('tujuan')">
+            <label>Destination</label>
+            <input type="text" id="tujuan" placeholder="Where are you going?" oninput="cariAlamat('tujuan')">
             <div id="res-tujuan" class="search-results"></div>
         </div>
 
         <div id="map"></div>
 
         <div class="box-tarif">
-            <span class="estimasi-waktu" id="tampilan-waktu">Estimasi Waktu: -</span>
-            <span class="total-label">Total Tarif 💰</span>
+            <span class="estimasi-waktu" id="tampilan-waktu">Travel time: -</span>
             <span class="total-harga" id="tampilan-tarif">Rp0</span>
-            <span class="info-minimal">✅ Tarif minimal Rp9.000 (Jarak 0-2 km)</span>
+            <span style="font-size: 10px; opacity: 0.8; font-weight: 600;">MIN. FARE RP9.000 APPLIED</span>
         </div>
-        <button id="btn-pesan" onclick="prosesPesan()">PESAN SEKARANG ✅</button>
+        <button id="btn-pesan" onclick="prosesPesan()">Confirm Order ⚡</button>
     </div>
 
     <div id="tab-ppob" class="hidden">
-        <div style="background: linear-gradient(135deg, var(--primary), #00c6ff); color: white; padding: 25px; border-radius: 15px; text-align: center;" onclick="window.open('https://link.speedcash.co.id/shopwarehouse', '_blank')">
-            <h4>PPOB & PRODUK DIGITAL ⚡</h4>
-            <p>Isi pulsa, data, & token listrik otomatis 24 jam.</p>
+        <div class="ppob-card" onclick="window.open('https://link.speedcash.co.id/shopwarehouse', '_blank')">
+            <div style="font-size: 40px; margin-bottom: 10px;">💎</div>
+            <h3 style="margin:0; color:#1e293b">PPOB Automate</h3>
+            <p style="font-size: 13px; color:#64748b; margin:10px 0;">Pulsa, Data, & Electricity. Fast, cheap, and 24/7 automated.</p>
+            <span style="color:var(--accent); font-size: 12px; font-weight:700;">OPEN SHOP →</span>
         </div>
     </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Inisialisasi Peta
-    let map = L.map('map').setView([-6.8048, 110.8405], 13); // Default Kudus
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    // FIX: Fungsi Ambil Lokasi Saya
+    function ambilLokasiSaya() {
+        const btn = document.querySelector('.btn-lokasi');
+        btn.innerText = "Finding you... 📍";
+        
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser");
+            btn.innerText = "✨ Use My Current Location";
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            locJemput = {lat: lat, lon: lon};
+            
+            // Reverse Geocoding untuk dapet nama alamat
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                const data = await response.json();
+                document.getElementById('jemput').value = data.display_name.split(',').slice(0,3).join(',');
+                
+                if (locTujuan) hitungRute();
+                updatePeta();
+                btn.innerText = "✨ Use My Current Location";
+            } catch (err) {
+                document.getElementById('jemput').value = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                btn.innerText = "✨ Use My Current Location";
+            }
+        }, (error) => {
+            alert("Please enable GPS/Location access!");
+            btn.innerText = "✨ Use My Current Location";
+        }, { enableHighAccuracy: true });
+    }
+
+    // Leaflet Init
+    let map = L.map('map', { zoomControl: false }).setView([-6.8048, 110.8405], 13);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
     let markerJemput, markerTujuan, polylineRute;
 
     let locJemput = null, locTujuan = null, jarakFinal = 0, searchTimeout = null;
 
-    // Fungsi Update Peta
     function updatePeta() {
-        if (!locJemput || !locTujuan) return;
+        if (!locJemput && !locTujuan) return;
         document.getElementById('map').style.display = 'block';
         map.invalidateSize();
 
@@ -137,15 +301,18 @@
         if (markerTujuan) map.removeLayer(markerTujuan);
         if (polylineRute) map.removeLayer(polylineRute);
 
-        markerJemput = L.marker([locJemput.lat, locJemput.lon]).addTo(map).bindPopup("Titik Jemput").openPopup();
-        markerTujuan = L.marker([locTujuan.lat, locTujuan.lon]).addTo(map).bindPopup("Titik Tujuan");
+        const iconJemput = L.divIcon({className: 'custom-div-icon', html: "<div style='background-color:#6366f1; width:12px; height:12px; border-radius:50%; border:2px solid white;'></div>", iconSize: [12, 12]});
+        const iconTujuan = L.divIcon({className: 'custom-div-icon', html: "<div style='background-color:#ef4444; width:12px; height:12px; border-radius:50%; border:2px solid white;'></div>", iconSize: [12, 12]});
 
-        polylineRute = L.polyline([
-            [locJemput.lat, locJemput.lon],
-            [locTujuan.lat, locTujuan.lon]
-        ], {color: 'blue', weight: 4, opacity: 0.6}).addTo(map);
+        if(locJemput) markerJemput = L.marker([locJemput.lat, locJemput.lon], {icon: iconJemput}).addTo(map);
+        if(locTujuan) markerTujuan = L.marker([locTujuan.lat, locTujuan.lon], {icon: iconTujuan}).addTo(map);
 
-        map.fitBounds(polylineRute.getBounds(), {padding: [30, 30]});
+        if (locJemput && locTujuan) {
+            polylineRute = L.polyline([[locJemput.lat, locJemput.lon], [locTujuan.lat, locTujuan.lon]], {color: '#6366f1', weight: 3, dashArray: '5, 10'}).addTo(map);
+            map.fitBounds(polylineRute.getBounds(), {padding: [40, 40]});
+        } else if (locJemput) {
+            map.setView([locJemput.lat, locJemput.lon], 15);
+        }
     }
 
     async function cariAlamat(type) {
@@ -155,26 +322,30 @@
         if (query.length < 3) { resDiv.style.display = 'none'; return; }
         
         searchTimeout = setTimeout(async () => {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=5`);
-            const data = await response.json();
-            resDiv.innerHTML = '';
-            if (data.length > 0) {
-                resDiv.style.display = 'block';
-                data.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'search-item';
-                    div.innerHTML = `📍 ${item.display_name.split(',').slice(0,3).join(',')}`;
-                    div.onclick = () => {
-                        document.getElementById(type).value = item.display_name.split(',').slice(0,3).join(',');
-                        resDiv.style.display = 'none';
-                        if (type === 'jemput') locJemput = {lat: item.lat, lon: item.lon};
-                        else locTujuan = {lat: item.lat, lon: item.lon};
-                        if (locJemput && locTujuan) { hitungRute(); updatePeta(); }
-                    };
-                    resDiv.appendChild(div);
-                });
-            }
-        }, 600);
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=5`);
+                const data = await response.json();
+                resDiv.innerHTML = '';
+                if (data.length > 0) {
+                    resDiv.style.display = 'block';
+                    data.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'search-item';
+                        const shortName = item.display_name.split(',').slice(0,3).join(',');
+                        div.innerHTML = `<b>${shortName}</b>`;
+                        div.onclick = () => {
+                            document.getElementById(type).value = shortName;
+                            resDiv.style.display = 'none';
+                            if (type === 'jemput') locJemput = {lat: item.lat, lon: item.lon};
+                            else locTujuan = {lat: item.lat, lon: item.lon};
+                            if (locJemput && locTujuan) hitungRute();
+                            updatePeta();
+                        };
+                        resDiv.appendChild(div);
+                    });
+                }
+            } catch(e) {}
+        }, 500);
     }
 
     async function hitungRute() {
@@ -191,21 +362,16 @@
         const layananEl = document.getElementById('layanan');
         const hargaPerKm = parseFloat(layananEl.selectedOptions[0].getAttribute('data-harga'));
         let jarakNum = parseFloat(jarakFinal);
-        
-        // Logika Pakem 9000
         let total = (jarakNum <= 2) ? 9000 : (jarakNum * hargaPerKm);
         if (total < 9000) total = 9000;
-
-        // Estimasi Waktu (1km = 2 menit)
         let estimasiMenit = Math.ceil(jarakNum * 2);
-
         document.getElementById('tampilan-tarif').innerText = "Rp" + Math.round(total).toLocaleString('id-ID');
-        document.getElementById('tampilan-waktu').innerText = `🕒 Estimasi Perjalanan: ±${estimasiMenit} Menit`;
+        document.getElementById('tampilan-waktu').innerText = `Travel time: ±${estimasiMenit} Mins`;
     }
 
-    // Fungsi Sapaan & Tabs (Standard)
     const jam = new Date().getHours();
     if (jam >= 18 || jam < 6) document.body.classList.add('dark-theme');
+
     function switchTab(t) {
         document.getElementById('tab-jasa').classList.toggle('hidden', t !== 'jasa');
         document.getElementById('tab-ppob').classList.toggle('hidden', t !== 'ppob');
@@ -213,23 +379,21 @@
     }
 
     function prosesPesan() {
-        if (!locJemput || !locTujuan) return alert("Pilih lokasi dulu!");
+        if (!locJemput || !locTujuan) return alert("Where are we going?");
         document.getElementById('loading-overlay').style.display = 'flex';
         setTimeout(() => {
-            const teks = encodeURIComponent(`*PESANAN SURUH AKUDUS*\n\n` +
-                `📋 Layanan: ${document.getElementById('layanan').value}\n` +
-                `📍 Jemput: ${document.getElementById('jemput').value}\n` +
-                `🏁 Tujuan: ${document.getElementById('tujuan').value}\n` +
-                `🛣️ Jarak: ${jarakFinal} KM\n` +
-                `🕒 Waktu: ±${Math.ceil(jarakFinal * 2)} Menit\n` +
-                `💰 Tarif: ${document.getElementById('tampilan-tarif').innerText}\n\n` +
-                `Ditunggu ya kak! 🙏`);
+            const teks = encodeURIComponent(`*SURUH AKUDUS ORDER*\n\n` +
+                `Service: ${document.getElementById('layanan').value}\n` +
+                `Pickup: ${document.getElementById('jemput').value}\n` +
+                `Drop: ${document.getElementById('tujuan').value}\n` +
+                `Distance: ${jarakFinal} KM\n` +
+                `Price: ${document.getElementById('tampilan-tarif').innerText}\n\n` +
+                `Please process my order ASAP! ✨`);
             window.open(`https://wa.me/6285124569347?text=${teks}`);
             document.getElementById('loading-overlay').style.display = 'none';
         }, 1500);
     }
 </script>
-<style> @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } </style>
 </body>
 </html>
 

@@ -3,120 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suruh Akudus - Lokasi Akurat 🛵</title>
+    <title>Suruh Akudus - Solusi Transportasi & PPOB 🛵</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        :root { --primary: #007bff; --success: #28a745; --body-bg: #f4f7f9; --card-bg: #ffffff; --text-color: #333; }
-        .dark-theme { --card-bg: #1e2125; --text-color: #e9ecef; --body-bg: #121416; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--body-bg); color: var(--text-color); padding: 15px; margin: 0; }
-        .card { max-width: 450px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        h2 { color: var(--primary); text-align: center; margin-bottom: 5px; }
-        .subtitle { text-align: center; font-size: 13px; margin-bottom: 20px; opacity: 0.8; }
-        
-        label { display: block; margin-top: 15px; font-weight: bold; font-size: 13px; color: var(--primary); }
-        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 10px; box-sizing: border-box; background: #fff; }
-        
-        #map { height: 300px; width: 100%; border-radius: 15px; margin-top: 15px; border: 2px solid var(--primary); }
-        .instruksi-peta { font-size: 11px; color: #666; font-style: italic; margin-top: 5px; text-align: center; }
+        :root {
+            --primary: #007bff;
+            --primary-dark: #0056b3;
+            --success: #28a745;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --body-bg: #f4f7f9;
+            --input-bg: #ffffff;
+            --input-border: #cccccc;
+        }
 
-        .box-tarif { background: rgba(0, 123, 255, 0.1); padding: 15px; border-radius: 15px; margin-top: 20px; text-align: center; border: 1px solid var(--primary); }
-        .total-harga { font-size: 30px; font-weight: 800; color: var(--primary); display: block; }
+        .dark-theme {
+            --card-bg: #1e2125;
+            --text-color: #e9ecef;
+            --body-bg: #121416;
+            --input-bg: #2b3035;
+            --input-border: #495057;
+        }
+
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: var(--body-bg); color: var(--text-color); padding: 15px; margin: 0; transition: 0.5s; }
+        .card { max-width: 450px; margin: auto; background: var(--card-bg); padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         
-        #btn-pesan { width: 100%; padding: 15px; background: var(--success); color: white; border: none; border-radius: 12px; margin-top: 15px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .search-results { background: white; border: 1px solid #ccc; position: absolute; z-index: 1000; width: 100%; max-height: 150px; overflow-y: auto; display: none; border-radius: 8px; color: #333; }
-        .search-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 12px; }
+        .header-section { text-align: center; margin-bottom: 20px; }
+        h2 { color: var(--primary); margin: 0; letter-spacing: 1px; }
+        .subtitle { font-size: 14px; opacity: 0.8; margin-top: 5px; font-weight: 500; }
+
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; background: rgba(0,0,0,0.05); padding: 5px; border-radius: 12px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; background: none; color: var(--text-color); transition: 0.3s; }
+        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(0,123,255,0.3); }
+
+        label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; color: var(--primary); }
+        select, input, textarea { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid var(--input-border); border-radius: 10px; box-sizing: border-box; font-size: 15px; background: var(--input-bg); color: var(--text-color); outline: none; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 5px rgba(0,123,255,0.2); }
+        
+        .btn-lokasi { background: none; border: none; color: var(--primary); font-size: 12px; cursor: pointer; padding: 8px 0; font-weight: bold; display: flex; align-items: center; gap: 4px; }
+        .search-results { background: var(--input-bg); border: 1px solid var(--input-border); position: absolute; z-index: 1000; width: 100%; max-height: 200px; overflow-y: auto; display: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .search-item { padding: 12px; cursor: pointer; border-bottom: 1px solid var(--input-border); font-size: 13px; line-height: 1.4; }
+        .search-item:hover { background: rgba(0,123,255,0.05); }
+
+        /* Styling Peta */
+        #map { height: 200px; width: 100%; border-radius: 15px; margin-top: 15px; border: 2px solid var(--primary); display: none; }
+
+        .box-tarif { background: rgba(0, 123, 255, 0.08); padding: 18px; border-radius: 15px; margin-top: 25px; text-align: center; border: 1px solid var(--primary); }
+        .total-label { font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--text-color); opacity: 0.7; }
+        .total-harga { font-size: 34px; font-weight: 800; color: var(--primary); display: block; margin: 5px 0; }
+        .estimasi-waktu { font-size: 14px; color: var(--text-color); font-weight: bold; display: block; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px dashed var(--primary); }
+        .info-minimal { font-size: 11px; font-weight: bold; color: var(--success); display: block; margin-top: 5px; }
+
+        .review-section { margin-top: 35px; padding-top: 20px; border-top: 1px solid var(--input-border); }
+        #btn-pesan { width: 100%; padding: 18px; background-color: var(--success); color: white; border: none; border-radius: 12px; margin-top: 20px; font-size: 16px; cursor: pointer; font-weight: bold; box-shadow: 0 5px 15px rgba(40,167,69,0.3); transition: 0.3s; }
+        .hidden { display: none; }
+        #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
     </style>
 </head>
 <body>
 
+<div id="loading-overlay">
+    <div style="width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.1); border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px;"></div>
+    <b id="loading-text">Menghubungkan...</b>
+</div>
+
 <div class="card">
-    <h2>SURUH AKUDUS 🚀</h2>
-    <p class="subtitle">Geser pin di peta untuk lokasi lebih akurat!</p>
-
-    <label>Layanan</label>
-    <select id="layanan" onchange="hitungTarif()">
-        <option value="Ojek" data-harga="2500">Ojek Online (Rp2.500/km)</option>
-        <option value="Kurir" data-harga="2000">Kurir Barang (Rp2.000/km)</option>
-        <option value="Jastip" data-harga="2000">Jasa Titip Belanja (Rp2.000/km)</option>
-    </select>
-
-    <div style="position: relative;">
-        <label>Titik Jemput 🔵</label>
-        <input type="text" id="input-jemput" placeholder="Ketik atau geser pin biru..." oninput="cariAlamat('jemput')">
-        <div id="res-jemput" class="search-results"></div>
+    <div class="header-section">
+        <h2>SURUH AKUDUS 🚀</h2>
+        <p class="subtitle" id="time-greeting">Mitra Setia Transportasi Anda</p>
     </div>
 
-    <div style="position: relative;">
-        <label>Titik Tujuan 🔴</label>
-        <input type="text" id="input-tujuan" placeholder="Ketik atau geser pin merah..." oninput="cariAlamat('tujuan')">
-        <div id="res-tujuan" class="search-results"></div>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('jasa')">🛵 Layanan Jasa</button>
+        <button class="tab-btn" onclick="switchTab('ppob')">💎 Produk Digital</button>
     </div>
 
-    <div id="map"></div>
-    <p class="instruksi-peta">💡 Klik pada peta untuk pindahkan tujuan, atau geser pinnya.</p>
+    <div id="tab-jasa">
+        <label>Pilih Layanan 📋</label>
+        <select id="layanan" onchange="hitungTarif()">
+            <option value="Ojek" data-harga="2500">Ojek Online (Rp2.500/km) 🛵</option>
+            <option value="Kurir" data-harga="2000">Kurir Barang (Rp2.000/km) 📦</option>
+            <option value="Jastip" data-harga="2000">Jasa Titip Belanja (Rp2.000/km) 🛒</option>
+        </select>
 
-    <div class="box-tarif">
-        <span id="tampilan-waktu" style="font-size: 12px; font-weight: bold;">Waktu Perjalanan: -</span>
-        <span style="display: block; font-size: 12px; margin-top: 5px;">Total Estimasi Tarif:</span>
-        <span class="total-harga" id="tampilan-tarif">Rp9.000</span>
-        <small>Tarif minimal Rp9.000 (0-2 km)</small>
+        <div style="position: relative;">
+            <label>Titik Penjemputan 📍</label>
+            <input type="text" id="jemput" placeholder="Cari lokasi jemput..." oninput="cariAlamat('jemput')">
+            <button type="button" class="btn-lokasi" onclick="ambilLokasiSaya()">✨ Gunakan Lokasi Saya</button>
+            <div id="res-jemput" class="search-results"></div>
+        </div>
+
+        <div style="position: relative;">
+            <label>Titik Tujuan 🏁</label>
+            <input type="text" id="tujuan" placeholder="Cari tujuan..." oninput="cariAlamat('tujuan')">
+            <div id="res-tujuan" class="search-results"></div>
+        </div>
+
+        <div id="map"></div>
+
+        <div class="box-tarif">
+            <span class="estimasi-waktu" id="tampilan-waktu">Estimasi Waktu: -</span>
+            <span class="total-label">Total Tarif 💰</span>
+            <span class="total-harga" id="tampilan-tarif">Rp0</span>
+            <span class="info-minimal">✅ Tarif minimal Rp9.000 (Jarak 0-2 km)</span>
+        </div>
+        <button id="btn-pesan" onclick="prosesPesan()">PESAN SEKARANG ✅</button>
     </div>
 
-    <button id="btn-pesan" onclick="prosesPesan()">PESAN SEKARANG ✅</button>
+    <div id="tab-ppob" class="hidden">
+        <div style="background: linear-gradient(135deg, var(--primary), #00c6ff); color: white; padding: 25px; border-radius: 15px; text-align: center;" onclick="window.open('https://link.speedcash.co.id/shopwarehouse', '_blank')">
+            <h4>PPOB & PRODUK DIGITAL ⚡</h4>
+            <p>Isi pulsa, data, & token listrik otomatis 24 jam.</p>
+        </div>
+    </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     // Inisialisasi Peta
-    let map = L.map('map').setView([-6.8048, 110.8405], 13); // Fokus Kudus
+    let map = L.map('map').setView([-6.8048, 110.8405], 13); // Default Kudus
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    let markerJemput, markerTujuan, polylineRute;
 
-    // Marker Draggable (Bisa Digeser)
-    let markerJemput = L.marker([-6.8000, 110.8400], {draggable: true}).addTo(map).bindPopup("Titik Jemput (Geser Saya)");
-    let markerTujuan = L.marker([-6.8100, 110.8500], {draggable: true, icon: L.icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-        iconSize: [25, 41], iconAnchor: [12, 41]
-    })}).addTo(map).bindPopup("Titik Tujuan (Geser Saya)");
+    let locJemput = null, locTujuan = null, jarakFinal = 0, searchTimeout = null;
 
-    let lineRute = L.polyline([], {color: 'blue'}).addTo(map);
-    let jarakFinal = 0;
+    // Fungsi Update Peta
+    function updatePeta() {
+        if (!locJemput || !locTujuan) return;
+        document.getElementById('map').style.display = 'block';
+        map.invalidateSize();
 
-    // Fungsi Ambil Alamat dari Koordinat (Reverse Geocode)
-    async function getAlamat(lat, lon, targetId) {
-        try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-            const data = await res.json();
-            document.getElementById(targetId).value = data.display_name.split(',').slice(0, 3).join(',');
-            updateRute();
-        } catch (e) {}
+        if (markerJemput) map.removeLayer(markerJemput);
+        if (markerTujuan) map.removeLayer(markerTujuan);
+        if (polylineRute) map.removeLayer(polylineRute);
+
+        markerJemput = L.marker([locJemput.lat, locJemput.lon]).addTo(map).bindPopup("Titik Jemput").openPopup();
+        markerTujuan = L.marker([locTujuan.lat, locTujuan.lon]).addTo(map).bindPopup("Titik Tujuan");
+
+        polylineRute = L.polyline([
+            [locJemput.lat, locJemput.lon],
+            [locTujuan.lat, locTujuan.lon]
+        ], {color: 'blue', weight: 4, opacity: 0.6}).addTo(map);
+
+        map.fitBounds(polylineRute.getBounds(), {padding: [30, 30]});
     }
 
-    // Event saat Pin Digeser
-    markerJemput.on('dragend', function(e) {
-        let pos = markerJemput.getLatLng();
-        getAlamat(pos.lat, pos.lng, 'input-jemput');
-    });
-
-    markerTujuan.on('dragend', function(e) {
-        let pos = markerTujuan.getLatLng();
-        getAlamat(pos.lat, pos.lng, 'input-tujuan');
-    });
-
-    // Event saat Peta Diklik (Pindahkan Tujuan)
-    map.on('click', function(e) {
-        markerTujuan.setLatLng(e.latlng);
-        getAlamat(e.latlng.lat, e.latlng.lng, 'input-tujuan');
-    });
-
-    async function updateRute() {
-        let p1 = markerJemput.getLatLng();
-        let p2 = markerTujuan.getLatLng();
+    async function cariAlamat(type) {
+        clearTimeout(searchTimeout);
+        const query = document.getElementById(type).value;
+        const resDiv = document.getElementById('res-' + type);
+        if (query.length < 3) { resDiv.style.display = 'none'; return; }
         
-        lineRute.setLatLngs([p1, p2]);
-        map.fitBounds(lineRute.getBounds(), {padding: [50, 50]});
+        searchTimeout = setTimeout(async () => {
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=5`);
+            const data = await response.json();
+            resDiv.innerHTML = '';
+            if (data.length > 0) {
+                resDiv.style.display = 'block';
+                data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'search-item';
+                    div.innerHTML = `📍 ${item.display_name.split(',').slice(0,3).join(',')}`;
+                    div.onclick = () => {
+                        document.getElementById(type).value = item.display_name.split(',').slice(0,3).join(',');
+                        resDiv.style.display = 'none';
+                        if (type === 'jemput') locJemput = {lat: item.lat, lon: item.lon};
+                        else locTujuan = {lat: item.lat, lon: item.lon};
+                        if (locJemput && locTujuan) { hitungRute(); updatePeta(); }
+                    };
+                    resDiv.appendChild(div);
+                });
+            }
+        }, 600);
+    }
 
-        // Hitung Jarak via OSRM
-        const url = `https://router.project-osrm.org/route/v1/driving/${p1.lng},${p1.lat};${p2.lng},${p2.lat}?overview=false`;
+    async function hitungRute() {
+        const url = `https://router.project-osrm.org/route/v1/driving/${locJemput.lon},${locJemput.lat};${locTujuan.lon},${locTujuan.lat}?overview=false`;
         const res = await fetch(url);
         const data = await res.json();
         if (data.routes && data.routes[0]) {
@@ -126,54 +188,48 @@
     }
 
     function hitungTarif() {
-        const hKm = parseFloat(document.getElementById('layanan').selectedOptions[0].getAttribute('data-harga'));
-        let total = (jarakFinal <= 2) ? 9000 : (jarakFinal * hKm);
+        const layananEl = document.getElementById('layanan');
+        const hargaPerKm = parseFloat(layananEl.selectedOptions[0].getAttribute('data-harga'));
+        let jarakNum = parseFloat(jarakFinal);
+        
+        // Logika Pakem 9000
+        let total = (jarakNum <= 2) ? 9000 : (jarakNum * hargaPerKm);
         if (total < 9000) total = 9000;
 
+        // Estimasi Waktu (1km = 2 menit)
+        let estimasiMenit = Math.ceil(jarakNum * 2);
+
         document.getElementById('tampilan-tarif').innerText = "Rp" + Math.round(total).toLocaleString('id-ID');
-        document.getElementById('tampilan-waktu').innerText = `🕒 Estimasi Perjalanan: ±${Math.ceil(jarakFinal * 2)} Menit`;
+        document.getElementById('tampilan-waktu').innerText = `🕒 Estimasi Perjalanan: ±${estimasiMenit} Menit`;
     }
 
-    // Fungsi Cari Alamat (Ketik)
-    async function cariAlamat(type) {
-        const query = document.getElementById('input-' + type).value;
-        const resDiv = document.getElementById('res-' + type);
-        if (query.length < 3) return;
-
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=3`);
-        const data = await res.json();
-        resDiv.innerHTML = '';
-        resDiv.style.display = 'block';
-        data.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'search-item';
-            div.innerText = item.display_name.split(',').slice(0, 3).join(',');
-            div.onclick = () => {
-                const pos = {lat: item.lat, lng: item.lon};
-                if (type === 'jemput') markerJemput.setLatLng(pos);
-                else markerTujuan.setLatLng(pos);
-                document.getElementById('input-' + type).value = div.innerText;
-                resDiv.style.display = 'none';
-                updateRute();
-            };
-            resDiv.appendChild(div);
-        });
+    // Fungsi Sapaan & Tabs (Standard)
+    const jam = new Date().getHours();
+    if (jam >= 18 || jam < 6) document.body.classList.add('dark-theme');
+    function switchTab(t) {
+        document.getElementById('tab-jasa').classList.toggle('hidden', t !== 'jasa');
+        document.getElementById('tab-ppob').classList.toggle('hidden', t !== 'ppob');
+        document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i===0 && t==='jasa') || (i===1 && t==='ppob')));
     }
 
     function prosesPesan() {
-        const teks = encodeURIComponent(`*PESANAN SURUH AKUDUS*\n\n` +
-            `📍 Jemput: ${document.getElementById('input-jemput').value}\n` +
-            `🏁 Tujuan: ${document.getElementById('input-tujuan').value}\n` +
-            `🛣️ Jarak: ${jarakFinal} KM\n` +
-            `💰 Tarif: ${document.getElementById('tampilan-tarif').innerText}\n` +
-            `📍 Link Maps Tujuan: https://www.google.com/maps?q=${markerTujuan.getLatLng().lat},${markerTujuan.getLatLng().lng}`);
-        window.open(`https://wa.me/6285124569347?text=${teks}`);
+        if (!locJemput || !locTujuan) return alert("Pilih lokasi dulu!");
+        document.getElementById('loading-overlay').style.display = 'flex';
+        setTimeout(() => {
+            const teks = encodeURIComponent(`*PESANAN SURUH AKUDUS*\n\n` +
+                `📋 Layanan: ${document.getElementById('layanan').value}\n` +
+                `📍 Jemput: ${document.getElementById('jemput').value}\n` +
+                `🏁 Tujuan: ${document.getElementById('tujuan').value}\n` +
+                `🛣️ Jarak: ${jarakFinal} KM\n` +
+                `🕒 Waktu: ±${Math.ceil(jarakFinal * 2)} Menit\n` +
+                `💰 Tarif: ${document.getElementById('tampilan-tarif').innerText}\n\n` +
+                `Ditunggu ya kak! 🙏`);
+            window.open(`https://wa.me/6285124569347?text=${teks}`);
+            document.getElementById('loading-overlay').style.display = 'none';
+        }, 1500);
     }
-
-    // Set alamat awal
-    getAlamat(-6.8000, 110.8400, 'input-jemput');
-    getAlamat(-6.8100, 110.8500, 'input-tujuan');
 </script>
+<style> @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } </style>
 </body>
 </html>
 

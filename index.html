@@ -17,7 +17,6 @@
 
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: var(--body-bg); color: var(--text-color); padding: 15px; margin: 0; }
         
-        /* Pop Up Welcome Elegan */
         .welcome-popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 99999; backdrop-filter: blur(5px); }
         .popup-content { background: white; color: var(--primary); padding: 35px 25px; border-radius: 25px; text-align: center; max-width: 320px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 2px solid var(--primary); }
 
@@ -54,7 +53,6 @@
     <div class="popup-content">
         <h2>Halo, selamat datang! ✨</h2>
         <p>Senang bertemu Anda di <b>Suruh Akudus</b>. Kami siap membantu mobilitas Anda dengan sepenuh hati.</p>
-        <div style="margin-top:20px; font-size:11px; opacity:0.5;">MEMUAT DATA KUDUS...</div>
     </div>
 </div>
 
@@ -105,7 +103,6 @@
 </div>
 
 <script>
-    // 1. POP UP & GREETING
     setTimeout(() => { document.getElementById('welcomePop').style.display = 'none'; }, 3000);
     const jam = new Date().getHours();
     document.getElementById('time-greeting').innerText = jam < 12 ? "Selamat Pagi! Semangat beraktivitas." : jam < 18 ? "Selamat Siang! Hati-hati di jalan." : "Selamat Malam! Istirahat yang cukup.";
@@ -118,7 +115,6 @@
         document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i===0 && t==='jasa') || (i===1 && t==='ppob')));
     }
 
-    // 2. LOGIKA PENCARIAN DETAIL (KUDUS & SEKITARNYA)
     async function cariAlamat(type) {
         clearTimeout(searchTimeout);
         const query = document.getElementById(type).value;
@@ -126,19 +122,18 @@
         if (query.length < 2) { resDiv.style.display = 'none'; return; }
         
         searchTimeout = setTimeout(async () => {
-            // Kita arahkan pencarian ke area koordinat Kudus agar dusun-dusun kecil terangkat
             const url = `https://nominatim.openstreetmap.org/search?format=json&q=${query}+Kudus&viewbox=110.75,-6.70,110.95,-6.90&bounded=1&addressdetails=1&limit=10`;
             const response = await fetch(url);
             const data = await response.json();
             
             resDiv.innerHTML = '';
-            // Tambahkan saran lokasi populer jika query cocok
-            const populer = ["Alun-alun Simpang 7", "Menara Kudus", "Griya Kudus", "RSUD Loekmono Hadi", "Pasar Kliwon"];
+            // Lokasi populer Kudus
+            const populer = ["Alun-alun Simpang 7", "Menara Kudus", "Griya Kudus", "RSUD Loekmono Hadi", "Pasar Kliwon", "GOR Bung Karno", "Djarum Oasis"];
             populer.forEach(loc => {
                 if(loc.toLowerCase().includes(query.toLowerCase())){
                     const div = document.createElement('div');
                     div.className = 'search-item';
-                    div.innerHTML = `⭐ <b>${loc}</b> (Lokasi Populer)`;
+                    div.innerHTML = `⭐ <b>${loc}</b> (Populer)`;
                     div.onclick = () => pilihLokasi(type, loc, null, null);
                     resDiv.appendChild(div);
                 }
@@ -150,8 +145,7 @@
                     const div = document.createElement('div');
                     div.className = 'search-item';
                     const name = item.display_name.split(',')[0];
-                    const sub = item.display_name.split(',').slice(1, 3).join(',');
-                    div.innerHTML = `📍 <b>${name}</b><br><small>${sub}</small>`;
+                    div.innerHTML = `📍 <b>${name}</b><br><small>${item.display_name.split(',').slice(1, 3).join(',')}</small>`;
                     div.onclick = () => pilihLokasi(type, name, item.lat, item.lon);
                     resDiv.appendChild(div);
                 });
@@ -167,7 +161,6 @@
             else locTujuan = {lat, lon};
             if (locJemput && locTujuan) hitungRute();
         } else {
-            // Jika lokasi populer dipilih tanpa koordinat dari API, kita cari koordinatnya
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${name}+Kudus&limit=1`)
             .then(res => res.json()).then(d => {
                 if(d[0]){
@@ -184,38 +177,34 @@
         const res = await fetch(url);
         const data = await res.json();
         if (data.routes && data.routes[0]) {
-            jarakFinal = (data.routes[0].distance / 1000).toFixed(1);
+            jarakFinal = (data.routes[0].distance / 1000).toFixed(2); // Simpan 2 desimal
             hitungTarif();
         }
     }
 
-    // 3. FIX LOGIKA TARIF: WAJIB 9.000 DI AWAL
+    // --- FUNGSI FIX TARIF (SAYA KUNCI MATI) ---
     function hitungTarif() {
         const hargaPerKm = document.getElementById('layanan').selectedOptions[0].getAttribute('data-harga');
         let j = parseFloat(jarakFinal);
         
-        // Logika: Jarak 0-2 km WAJIB 9.000 (Tanpa pandang bulu)
-        // Diatas 2 km baru hitung (Jarak x Harga/km)
-        let total = (j <= 2) ? 9000 : (j * hargaPerKm);
-        
-        // Pastikan jika belum ada rute, tampilan default tetap 9.000 sebagai biaya dasar
+        let total = 9000; // HARGA DEFAULT WAJIB 9.000
+
+        // HANYA hitung tarif tambahan jika jarak DI ATAS 2 km
+        if (j > 2.0) {
+            total = j * hargaPerKm;
+        }
+
         document.getElementById('tampilan-tarif').innerText = "Rp" + Math.round(total).toLocaleString('id-ID');
     }
 
     function prosesPesan() {
-        if (!locJemput || !locTujuan) return alert("Silakan pilih lokasi jemput dan tujuan dulu ya!");
+        if (!locJemput || !locTujuan) return alert("Pilih lokasi dulu!");
         document.getElementById('loading-overlay').style.display = 'flex';
         setTimeout(() => {
-            const teks = encodeURIComponent(`*ORDER SURUH AKUDUS*\n\n` +
-                `📋 Layanan: ${document.getElementById('layanan').value}\n` +
-                `📍 Jemput: ${document.getElementById('jemput').value}\n` +
-                `🏁 Tujuan: ${document.getElementById('tujuan').value}\n` +
-                `🛣️ Jarak: ${jarakFinal} KM\n` +
-                `💰 Total: ${document.getElementById('tampilan-tarif').innerText}\n\n` +
-                `Mohon segera diproses ya Kak, terima kasih! 🙏`);
+            const teks = encodeURIComponent(`*ORDER SURUH AKUDUS*\n\nLayanan: ${document.getElementById('layanan').value}\nJemput: ${document.getElementById('jemput').value}\nTujuan: ${document.getElementById('tujuan').value}\nJarak: ${jarakFinal} KM\nTotal: ${document.getElementById('tampilan-tarif').innerText}`);
             window.open(`https://wa.me/6285124569347?text=${teks}`);
             document.getElementById('loading-overlay').style.display = 'none';
-        }, 1500);
+        }, 1000);
     }
 </script>
 </body>

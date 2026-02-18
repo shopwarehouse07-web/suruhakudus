@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suruh Akudus - Layanan Terpercaya</title>
+    <title>Suruh Akudus - Jasa & PPOB Ter-SatSet 🛵</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
@@ -12,56 +12,58 @@
             --success: #28a745;
             --card-bg: #ffffff;
             --text-color: #333333;
-            --body-bg: #f8faff;
+            --body-bg: #f4f7f9;
             --input-bg: #ffffff;
-            --input-border: #e0e6ed;
+            --input-border: #cccccc;
         }
 
         .dark-theme {
             --card-bg: #1e2125;
-            --text-color: #f1f3f5;
+            --text-color: #e9ecef;
             --body-bg: #121416;
             --input-bg: #2b3035;
             --input-border: #495057;
         }
 
-        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; background-color: var(--body-bg); color: var(--text-color); padding: 15px; margin: 0; transition: 0.5s; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: var(--body-bg); color: var(--text-color); padding: 15px; margin: 0; transition: 0.5s; }
+        .card { max-width: 450px; margin: auto; background: var(--card-bg); padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         
-        /* Pop Up Welcome - Desain Elegan */
-        .welcome-popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 99999; backdrop-filter: blur(5px); }
-        .popup-content { background: white; color: var(--primary); padding: 40px 25px; border-radius: 30px; text-align: center; max-width: 320px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 2px solid var(--primary); }
-        .popup-content h2 { margin-bottom: 10px; font-size: 26px; }
-        .popup-content p { color: #555; line-height: 1.6; margin-bottom: 0; }
+        /* Pop Up Style */
+        .welcome-popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 99999; }
+        .popup-content { background: var(--primary); color: white; padding: 30px; border-radius: 24px; text-align: center; max-width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 
-        .card { max-width: 450px; margin: auto; background: var(--card-bg); padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,123,255,0.1); }
+        .header-section { text-align: center; margin-bottom: 20px; }
+        h2 { color: var(--primary); margin: 0; letter-spacing: 1px; }
+        .subtitle { font-size: 14px; opacity: 0.8; margin-top: 5px; font-weight: 500; }
+
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; background: rgba(0,0,0,0.05); padding: 5px; border-radius: 12px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; background: none; color: var(--text-color); }
+        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(0,123,255,0.3); }
+
+        label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; color: var(--primary); }
+        select, input, textarea { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid var(--input-border); border-radius: 10px; box-sizing: border-box; font-size: 15px; background: var(--input-bg); color: var(--text-color); outline: none; }
         
-        .header-section { text-align: center; margin-bottom: 25px; }
-        h2 { color: var(--primary); margin: 0; letter-spacing: 0.5px; }
-        .subtitle { font-size: 14px; opacity: 0.7; margin-top: 6px; font-weight: 500; }
+        .btn-lokasi { background: none; border: none; color: var(--primary); font-size: 12px; cursor: pointer; padding: 8px 0; font-weight: bold; display: flex; align-items: center; gap: 4px; }
+        .search-results { background: var(--input-bg); border: 1px solid var(--input-border); position: absolute; z-index: 1000; width: 100%; max-height: 250px; overflow-y: auto; display: none; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .search-item { padding: 12px; cursor: pointer; border-bottom: 1px solid var(--input-border); font-size: 13px; }
+        .search-item:hover { background: rgba(0,123,255,0.05); }
 
-        .tabs { display: flex; gap: 8px; margin-bottom: 25px; background: rgba(0,0,0,0.03); padding: 5px; border-radius: 15px; }
-        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; background: none; color: var(--text-color); transition: 0.3s; }
-        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(0,123,255,0.2); }
+        .box-tarif { background: rgba(0, 123, 255, 0.08); padding: 18px; border-radius: 15px; margin-top: 25px; text-align: center; border: 1px solid var(--primary); }
+        .total-harga { font-size: 34px; font-weight: 800; color: var(--primary); display: block; margin: 5px 0; }
+        .info-minimal { font-size: 12px; font-weight: bold; color: var(--success); }
 
-        label { display: block; margin-top: 15px; font-weight: 600; font-size: 13px; color: var(--primary); text-transform: uppercase; }
-        select, input, textarea { width: 100%; padding: 14px; margin-top: 8px; border: 1.5px solid var(--input-border); border-radius: 12px; box-sizing: border-box; font-size: 15px; background: var(--input-bg); color: var(--text-color); outline: none; }
-        
-        .btn-lokasi { background: none; border: none; color: var(--primary); font-size: 12px; cursor: pointer; padding: 10px 0; font-weight: bold; text-decoration: underline; }
-        .search-results { background: var(--input-bg); border: 1px solid var(--input-border); position: absolute; z-index: 1000; width: 100%; max-height: 250px; overflow-y: auto; display: none; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
-        .search-item { padding: 14px; cursor: pointer; border-bottom: 1px solid var(--input-border); font-size: 13px; }
+        .review-section { margin-top: 35px; padding-top: 20px; border-top: 1px solid var(--input-border); }
+        .review-form { background: rgba(0,0,0,0.02); padding: 15px; border-radius: 12px; margin-bottom: 15px; }
+        .review-list { max-height: 250px; overflow-y: auto; }
+        .review-item { padding: 12px; border-bottom: 1px solid var(--input-border); margin-bottom: 8px; background: rgba(255,255,255,0.05); border-radius: 8px; }
+        .rev-name { font-weight: bold; color: var(--primary); font-size: 14px; display: flex; justify-content: space-between; }
+        .rev-text { font-size: 13px; margin-top: 4px; }
 
-        .box-tarif { background: linear-gradient(135deg, rgba(0,123,255,0.02), rgba(0,123,255,0.08)); padding: 20px; border-radius: 18px; margin-top: 25px; text-align: center; border: 1px solid var(--primary); }
-        .total-harga { font-size: 36px; font-weight: 800; color: var(--primary); display: block; }
-        .info-minimal { font-size: 12px; font-weight: 600; color: var(--success); display: block; margin-top: 5px; }
-
-        #btn-pesan { width: 100%; padding: 18px; background-color: var(--success); color: white; border: none; border-radius: 15px; margin-top: 20px; font-size: 16px; cursor: pointer; font-weight: bold; box-shadow: 0 6px 15px rgba(40,167,69,0.2); }
-
-        .review-section { margin-top: 35px; padding-top: 25px; border-top: 1px solid var(--input-border); }
-        .review-item { padding: 15px; border-bottom: 1px solid var(--input-border); margin-bottom: 5px; }
-        
-        #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 10000; flex-direction: column; align-items: center; justify-content: center; }
-        .spinner { width: 45px; height: 45px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; padding: 20px; }
+        .spinner { width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.1); border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #btn-pesan { width: 100%; padding: 18px; background-color: var(--success); color: white; border: none; border-radius: 12px; margin-top: 20px; font-size: 16px; cursor: pointer; font-weight: bold; }
         .hidden { display: none; }
     </style>
 </head>
@@ -69,66 +71,71 @@
 
 <div id="welcomePop" class="welcome-popup">
     <div class="popup-content">
-        <h2>Halo, selamat datang! ✨</h2>
-        <p>Senang bertemu Anda di <b>Suruh Akudus</b>. Kami siap membantu kebutuhan harian Anda dengan sepenuh hati.</p>
-        <div style="margin-top: 20px; font-size: 12px; opacity: 0.6;">Sedang memuat sistem...</div>
+        <h1 style="margin:0;">Halo, Bestie! ✨</h1>
+        <p style="font-size: 18px; line-height: 1.5;">Selamat datang di <b>Suruh Akudus</b>. Jasa angkut & kurir paling Sat-Set se-Kudus Raya! 🚀</p>
+        <small>Sabar ya, lagi loading...</small>
     </div>
 </div>
 
 <div id="loading-overlay">
     <div class="spinner"></div>
-    <p style="color: var(--primary); font-weight: 600; margin-top: 15px;">Sedang memproses pesanan Anda...</p>
+    <b id="loading-text">Lagi diproses, Kak... ✨</b>
 </div>
 
 <div class="card">
     <div class="header-section">
         <h2>SURUH AKUDUS 🛵</h2>
-        <p class="subtitle" id="time-greeting">Partner Terpercaya Perjalanan & Kurir</p>
+        <p class="subtitle" id="time-greeting">Solusi Jasa & PPOB Terpercaya</p>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('jasa')">Layanan Utama</button>
-        <button class="tab-btn" onclick="switchTab('ppob')">Produk Digital</button>
+        <button class="tab-btn active" onclick="switchTab('jasa')">🛵 Jasa</button>
+        <button class="tab-btn" onclick="switchTab('ppob')">💎 PPOB</button>
     </div>
 
     <div id="tab-jasa">
-        <label>Jenis Layanan</label>
+        <label>Pilih Layanan Kamu 📋</label>
         <select id="layanan" onchange="hitungTarif()">
-            <option value="Ojek" data-harga="2500">Ojek Online (Rp2.500/km)</option>
-            <option value="Kurir" data-harga="2000">Kurir Barang (Rp2.000/km)</option>
-            <option value="Jastip" data-harga="2000">Jasa Titip (Rp2.000/km)</option>
+            <option value="Ojek" data-harga="2500">Ojek (Rp2.500/km) 🛵</option>
+            <option value="Kurir" data-harga="2000">Kurir Barang (Rp2.000/km) 📦</option>
+            <option value="Jastip" data-harga="2000">Jasa Titip (Rp2.000/km) 🛒</option>
         </select>
 
         <div style="position: relative;">
-            <label>Lokasi Penjemputan</label>
-            <input type="text" id="jemput" placeholder="Cari desa, dusun, atau nama jalan..." oninput="cariAlamat('jemput')">
-            <button type="button" class="btn-lokasi" onclick="ambilLokasiSaya()">📍 Gunakan lokasi saya saat ini</button>
+            <label>Jemput di Mana? 📍</label>
+            <input type="text" id="jemput" placeholder="Ketik nama desa/dusun/jalan..." oninput="cariAlamat('jemput')">
+            <button type="button" class="btn-lokasi" onclick="ambilLokasiSaya()">✨ Pake Lokasi Aku Sekarang</button>
             <div id="res-jemput" class="search-results"></div>
         </div>
 
         <div style="position: relative;">
-            <label>Lokasi Tujuan</label>
-            <input type="text" id="tujuan" placeholder="Tentukan desa atau tujuan..." oninput="cariAlamat('tujuan')">
+            <label>Tujuannya ke Mana? 🏁</label>
+            <input type="text" id="tujuan" placeholder="Ketik nama desa/dusun/jalan..." oninput="cariAlamat('tujuan')">
             <div id="res-tujuan" class="search-results"></div>
         </div>
 
         <div class="box-tarif">
-            <span style="font-size: 12px; font-weight: 600; opacity: 0.6;">ESTIMASI TARIF</span>
+            <span style="font-size: 13px; font-weight: 600; opacity: 0.7;">TOTAL TARIF 💰</span>
             <span class="total-harga" id="tampilan-tarif">Rp0</span>
-            <span class="info-minimal">Tarif Flat Rp9.000 khusus jarak 0-2 KM</span>
+            <span class="info-minimal">✅ Harga Flat Rp9.000 (Jarak 0-2 KM)</span>
         </div>
-        <button id="btn-pesan" onclick="prosesPesan()">PESAN SEKARANG VIA WHATSAPP</button>
+        <button id="btn-pesan" onclick="prosesPesan()">GAS ORDER VIA WHATSAPP ✅</button>
     </div>
 
     <div id="tab-ppob" class="hidden">
         <div style="background: linear-gradient(135deg, var(--primary), #00c6ff); color: white; padding: 25px; border-radius: 15px; cursor: pointer; text-align: center;" onclick="window.open('https://link.speedcash.co.id/shopwarehouse', '_blank')">
-            <h4 style="margin:0;">PULSA & TAGIHAN ⚡</h4>
-            <p style="font-size:12px; margin-top:10px;">Isi ulang pulsa, token, dan paket data otomatis 24 jam.</p>
+            <h4>TOP UP & TAGIHAN ⚡</h4>
+            <p style="font-size:12px;">Pulsa, Token, Kuota. Murah & Masuknya cepet banget!</p>
         </div>
     </div>
 
     <div class="review-section">
-        <h4 style="text-align:center; color: var(--primary);">Ulasan Pelanggan</h4>
+        <h4>💬 Ulasan Bestie</h4>
+        <div class="review-form">
+            <input type="text" id="rev-nama" placeholder="Nama Kamu (Wajib)" required>
+            <textarea id="rev-pesan" rows="2" placeholder="Kasih testimoni dong..."></textarea>
+            <button onclick="simpanReview()" style="width:100%; margin-top:10px; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">Kirim Review ✨</button>
+        </div>
         <div id="review-list" class="review-list"></div>
     </div>
 </div>
@@ -136,17 +143,17 @@
 <script>
     // 1. POP UP & GREETING
     setTimeout(() => {
-        document.getElementById('welcomePop').style.opacity = '0';
-        setTimeout(() => document.getElementById('welcomePop').style.display = 'none', 500);
+        document.getElementById('welcomePop').style.display = 'none';
     }, 3000);
 
     const jam = new Date().getHours();
     const greet = document.getElementById('time-greeting');
-    if (jam < 12) greet.innerText = "Selamat pagi! Awali hari Anda dengan perjalanan nyaman.";
-    else if (jam < 18) greet.innerText = "Selamat siang! Kami siap mengantar Anda sampai tujuan.";
-    else greet.innerText = "Selamat malam! Butuh bantuan kurir di jam ini? Kami ada.";
+    if (jam < 11) greet.innerText = "Selamat Pagi, Kak! Semangat ya! ✨";
+    else if (jam < 15) greet.innerText = "Selamat Siang! Hati-hati di jalan! ☀️";
+    else if (jam < 18) greet.innerText = "Selamat Sore! Capek ya? Rehat dulu! 🌤️";
+    else greet.innerText = "Selamat Malam! Jangan lupa istirahat! 🌙";
 
-    // 2. SEARCH & ROUTE (KUDUS & SEKITARNYA)
+    // 2. SEARCH & ROUTE
     let locJemput = null, locTujuan = null, jarakFinal = 0, searchTimeout = null;
 
     function switchTab(t) {
@@ -162,8 +169,8 @@
         if (query.length < 2) { resDiv.style.display = 'none'; return; }
         
         searchTimeout = setTimeout(async () => {
-            // Memperluas pencarian ke level paling detail di area Kudus & sekitarnya
-            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${query}+Kudus+Jawa+Tengah&limit=10&addressdetails=1`;
+            // Kita fokuskan pencarian di area Kudus dan sekitarnya (Jateng)
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${query}+Kudus+Jawa+Tengah&limit=8&addressdetails=1&countrycodes=id`;
             const response = await fetch(url);
             const data = await response.json();
             
@@ -173,12 +180,11 @@
                 data.forEach(item => {
                     const div = document.createElement('div');
                     div.className = 'search-item';
-                    const parts = item.display_name.split(',');
-                    const name = parts[0];
-                    const sub = parts.slice(1, 4).join(',');
-                    div.innerHTML = `<b>${name}</b><br><small style="color:#777">${sub}</small>`;
+                    const mainAddr = item.display_name.split(',')[0];
+                    const subAddr = item.display_name.split(',').slice(1, 3).join(',');
+                    div.innerHTML = `📍 <b>${mainAddr}</b><br><small style="color:#666">${subAddr}</small>`;
                     div.onclick = () => {
-                        document.getElementById(type).value = name;
+                        document.getElementById(type).value = mainAddr + ", " + subAddr;
                         resDiv.style.display = 'none';
                         if (type === 'jemput') locJemput = {lat: item.lat, lon: item.lon};
                         else locTujuan = {lat: item.lat, lon: item.lon};
@@ -191,13 +197,14 @@
     }
 
     async function ambilLokasiSaya() {
-        if (!navigator.geolocation) return alert("Fitur GPS tidak tersedia.");
-        document.getElementById('jemput').value = "Mencari lokasi Anda...";
+        if (!navigator.geolocation) return alert("GPS gak aktif nih, Kak.");
+        document.getElementById('jemput').value = "Lagi nyari posisi kamu... 📡";
         navigator.geolocation.getCurrentPosition(async (pos) => {
             locJemput = {lat: pos.coords.latitude, lon: pos.coords.longitude};
             const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${locJemput.lat}&lon=${locJemput.lon}`);
             const data = await response.json();
-            document.getElementById('jemput').value = data.display_name.split(',')[0];
+            const addr = data.display_name.split(',').slice(0, 2).join(',');
+            document.getElementById('jemput').value = addr;
             if (locTujuan) hitungRute();
         });
     }
@@ -216,38 +223,54 @@
         const hargaPerKm = document.getElementById('layanan').selectedOptions[0].getAttribute('data-harga');
         let j = parseFloat(jarakFinal);
         
-        // LOGIKA: Jarak 0-2 KM TARIF TETAP 9000
+        // LOGIKA REVISI: Jarak <= 2km tarif TETAP 9.000
         let total = (j <= 2) ? 9000 : (j * hargaPerKm);
         
         document.getElementById('tampilan-tarif').innerText = "Rp" + Math.round(total).toLocaleString('id-ID');
     }
 
     function prosesPesan() {
-        if (jarakFinal <= 0) return alert("Silakan tentukan rute penjemputan dan tujuan.");
+        if (jarakFinal <= 0) return alert("Isi lokasinya dulu ya, Kak! 🙏");
+        
         document.getElementById('loading-overlay').style.display = 'flex';
         setTimeout(() => {
-            const teks = encodeURIComponent(`*KONFIRMASI PESANAN SURUH AKUDUS*\n\n` +
-                `Layanan: ${document.getElementById('layanan').value}\n` +
-                `Titik Jemput: ${document.getElementById('jemput').value}\n` +
-                `Titik Tujuan: ${document.getElementById('tujuan').value}\n` +
-                `Jarak Tempuh: ${jarakFinal} KM\n` +
-                `Total Tarif: ${document.getElementById('tampilan-tarif').innerText}\n\n` +
-                `Mohon segera diproses, terima kasih.`);
+            const teks = encodeURIComponent(`*ORDER SURUH AKUDUS*\n\n` +
+                `📋 Layanan: ${document.getElementById('layanan').value}\n` +
+                `📍 Jemput: ${document.getElementById('jemput').value}\n` +
+                `🏁 Tujuan: ${document.getElementById('tujuan').value}\n` +
+                `🛣️ Jarak: ${jarakFinal} KM\n` +
+                `💰 Total: ${document.getElementById('tampilan-tarif').innerText}\n\n` +
+                `Ditunggu ya Kak, makasih! ✨`);
             window.open(`https://wa.me/6285124569347?text=${teks}`);
             document.getElementById('loading-overlay').style.display = 'none';
         }, 2000);
     }
 
+    function simpanReview() {
+        const nama = document.getElementById('rev-nama').value;
+        const pesan = document.getElementById('rev-pesan').value;
+        if (!nama || !pesan) return alert("Isi nama & ulasannya dulu ya.");
+
+        const reviewBaru = { nama, pesan, tgl: new Date().toLocaleDateString('id-ID') };
+        let reviews = JSON.parse(localStorage.getItem('suruh_reviews')) || [];
+        reviews.unshift(reviewBaru);
+        localStorage.setItem('suruh_reviews', JSON.stringify(reviews));
+
+        document.getElementById('rev-nama').value = '';
+        document.getElementById('rev-pesan').value = '';
+        tampilkanReview();
+    }
+
     function tampilkanReview() {
         const list = document.getElementById('review-list');
-        let reviews = [
-            {nama: "Mbak Indah", pesan: "Pelayanannya sangat ramah dan ojeknya tepat waktu. Recomended!", tgl: "15/02/2026"},
-            {nama: "Mas Pratama", pesan: "Kurir barangnya amanah, tarif sangat transparan.", tgl: "14/02/2026"}
+        let reviews = JSON.parse(localStorage.getItem('suruh_reviews')) || [
+            {nama: "Putri", pesan: "Ojeknya gercep parah, tarifnya juga oke buat kantong pelajar. 🫶", tgl: "13/02/2026"},
+            {nama: "Rizky", pesan: "Jastip sego jangkrik kudus amanah banget. ✨", tgl: "12/02/2026"}
         ];
         list.innerHTML = reviews.map(r => `
             <div class="review-item">
-                <div style="font-weight:bold; font-size:14px; color:var(--primary)">${r.nama}</div>
-                <div style="font-size:13px; margin-top:3px;">"${r.pesan}"</div>
+                <div class="rev-name"><span>👤 ${r.nama}</span> <span style="font-size:10px; color:#999;">${r.tgl}</span></div>
+                <div class="rev-text">"${r.pesan}"</div>
             </div>
         `).join('');
     }

@@ -110,7 +110,7 @@
         <div class="box-tarif">
             <span class="total-label">Estimasi Total Tarif 💰</span>
             <span class="total-harga" id="tampilan-tarif">Rp0</span>
-            <span class="info-minimal" id="info-minimal">✅ Tarif minimal Rp9.000 untuk jarak 0-2 km</span>
+            <span class="info-minimal">✅ Tarif minimal Rp9.000 untuk jarak 0-2 km</span>
         </div>
         <button id="btn-pesan" onclick="prosesPesan()">PESAN SEKARANG VIA WHATSAPP ✅</button>
     </div>
@@ -220,27 +220,27 @@
         }
     }
 
-    // --- BAGIAN ROMBAKAN TARIF ---
+    // --- PERBAIKAN TARIF PAKEM 9000 ---
     function hitungTarif() {
         const layananEl = document.getElementById('layanan');
         const hargaPerKm = parseFloat(layananEl.selectedOptions[0].getAttribute('data-harga'));
         let jarakNum = parseFloat(jarakFinal);
         let total = 0;
 
-        // Logika Pakem: Dibawah atau sama dengan 2km = Rp9.000
-        // Berlaku juga untuk jarak 0m (satu titik lokasi)
+        // Jika jarak 0 - 2 km, tarif wajib 9000
         if (jarakNum <= 2) {
             total = 9000;
         } else {
-            // Jika di atas 2km, baru menggunakan sistem tarif per KM
+            // Jika di atas 2 km, hitung jarak x harga per km
             total = jarakNum * hargaPerKm;
+            // Keamanan tambahan: Jika hasil perkalian di atas 2km masih < 9000, paksa ke 9000
+            if (total < 9000) total = 9000;
         }
 
         document.getElementById('tampilan-tarif').innerText = "Rp" + Math.round(total).toLocaleString('id-ID');
     }
 
     function prosesPesan() {
-        // Cek jika lokasi sudah diisi (meskipun jaraknya 0 KM)
         if (!locJemput || !locTujuan) return alert("Silakan masukkan lokasi penjemputan dan tujuan Anda terlebih dahulu.");
         
         document.getElementById('loading-overlay').style.display = 'flex';
